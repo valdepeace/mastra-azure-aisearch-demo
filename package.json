@@ -1,0 +1,44 @@
+{
+  "name": "mastra-iasearch-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "populate": "tsx src/mastra/scripts/populate-knowledge-base.ts",
+    "dev": "mastra dev",
+    "build": "mastra build",
+    "start": "mastra start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.0.5",
+    "@azure/core-auth": "^1.7.2",
+    "@azure/search-documents": "^12.0.0",
+    "@mastra/aisearch": "git+https://github.com/valdepeace/mastra/tree/main/stores/aisearch",
+    "@mastra/core": "0.24.0",
+    "@mastra/evals": "0.14.3",
+    "@mastra/libsql": "0.16.2",
+    "@mastra/loggers": "0.10.19",
+    "@mastra/memory": "0.15.11",
+    "ai": "^4.0.0",
+    "dotenv": "^17.2.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@vitest/ui": "^4.0.9",
+    "mastra": "^0.18.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.9"
+  }
+}
