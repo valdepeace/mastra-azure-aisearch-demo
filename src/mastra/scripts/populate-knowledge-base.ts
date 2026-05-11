@@ -6,7 +6,7 @@
  */
 
 import 'dotenv/config';
-import { AzureAISearchVector } from '@mastra/aisearch';
+import { AzureAISearchVector } from '@mastra/azure-ai-search';
 import { openai } from '@ai-sdk/openai';
 import { embed } from 'ai';
 
@@ -209,8 +209,8 @@ async function populateKnowledgeBase() {
     console.log(
       `\n${colors.green}✅ Knowledge base populated successfully!${colors.reset}\n`,
     );
-    console.log(`${colors.cyan}💡 Next step:${colors.reset} Run the agent with:`);
-    console.log(`  ${colors.blue}npm run demo:agent${colors.reset}\n`);
+    console.log(`${colors.cyan}💡 Next step:${colors.reset} Start Mastra Dev:`);
+    console.log(`  ${colors.blue}pnpm run dev${colors.reset}\n`);
   } catch (error: any) {
     console.error(`\n${colors.yellow}❌ Error:${colors.reset}`, error.message);
     console.error(error);

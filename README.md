@@ -1,11 +1,16 @@
 # Mastra + Azure AI Search Demo
 
- **Note:** This is a demo project to test the integration of Azure AI Search with Mastra. The package name we are using for testing is **not final**. Currently, we use:
+ **Note:** This is a demo project to test the integration of Azure AI Search with Mastra.
+For local execution of this POC, use a local link to the package:
 ```json
-"@mastra/aisearch": "link:E:/workspace/personal/mastra/stores/aisearch"
+"@mastra/azure-ai-search": "link:E:/workspace/personal/mastra/stores/azure"
 ```
-This package points to the repository:
-https://github.com/valdepeace/mastra/tree/main/stores/aisearch
+PR source repository (reference):
+https://github.com/valdepeace/mastra/tree/main/stores/azure
+
+Why local link for the demo:
+- The Git dependency from the monorepo path can resolve without `dist/` artifacts.
+- This package exports `dist/index.js`, so without `dist` the runtime fails with `ERR_MODULE_NOT_FOUND`.
 
 This demo shows how to use **Azure AI Search** as a vector store inside **Mastra** for:
 
@@ -64,14 +69,14 @@ This design keeps conversations focused: when the user asks something new, the a
 
 ## 2. Components
 
-### 2.1. AzureAISearchVector (`@mastra/aisearch`)
+### 2.1. AzureAISearchVector (`@mastra/azure-ai-search`)
 
 `AzureAISearchVector` is a `MastraVector` implementation that uses **Azure AI Search** for vector storage and similarity search.
 
 Example usage:
 
 ```ts
-import { AzureAISearchVector } from '@mastra/aisearch';
+import { AzureAISearchVector } from '@mastra/azure-ai-search';
 
 const vectorStore = new AzureAISearchVector({
   id: 'azure-ai-search',
@@ -84,6 +89,15 @@ Used in two places:
 
 * As a **tool-backed store** for the knowledge base (`knowledge-base`).
 * As the **vector backend for Memory** (`memory_messages`).
+
+Current adapter contract for this demo:
+
+* `createIndex`, `upsert`, `query`, `update`, and `delete` are supported by `@mastra/azure-ai-search`.
+* metadata is stored as a JSON string.
+* JSON metadata is **not filterable by default**.
+* Filters must target explicit Azure AI Search fields such as `id`, `content`, or declared `additionalFields`.
+* `query()` always requires `queryVector`.
+* advancedQuery() is the path for Azure-specific features such as semantic reranking, text vectorization, or multi-vector queries.
 
 ### 2.2. Knowledge Agent (tools + RAG)
 
@@ -196,7 +210,7 @@ You have a script similar to:
 ```ts
 // src/scripts/populateKnowledgeBase.ts
 import 'dotenv/config';
-import { AzureAISearchVector } from '@mastra/aisearch';
+import { AzureAISearchVector } from '@mastra/azure-ai-search';
 import { openai } from '@ai-sdk/openai';
 import { embed } from 'ai';
 
@@ -243,12 +257,16 @@ async function populateKnowledgeBase() {
 populateKnowledgeBase().catch(console.error);
 ```
 
-Add a script in `package.json` and run, for example:
+Important note for this demo:
+
+* The sample documents keep `title`, `category`, and `tags` inside `metadata`.
+* Those values are returned in results, but they are not filterable unless you also project them to explicit Azure AI Search fields in the index schema and populate those fields during indexing.
+* The demo only uses indexed filters on built-in fields such as `id` and `content`.
+
+Run the populate script from `package.json`:
 
 ```bash
-npm run populate:knowledge
-# or
-npx tsx src/scripts/populateKnowledgeBase.ts
+npm run populate
 ```
 
 After this, in the Azure portal you should see:
@@ -263,9 +281,7 @@ After this, in the Azure portal you should see:
 Start the dev server:
 
 ```bash
-npm run mastra:dev
-# or whatever command you use, e.g.
-npx mastra dev
+npm run dev
 ```
 
 The CLI will show the URL of the **Mastra Dev UI**.
@@ -285,13 +301,20 @@ You should see:
 * Memory reads/writes using the `memory_messages` index.
 * Conversations staying **focused on the topic** instead of looping.
 
+The demo search tools intentionally avoid unsupported patterns:
+
+* No metadata-only queries.
+* No filters on arbitrary keys inside `metadata`.
+* No Azure-only options passed through `query()`.
+* Azure-specific capabilities belong in `advancedQuery()`, which is outside the main runtime flow of this demo.
+
 ---
 
 ## 7. How to describe this in the PR
 
 You can summarise the behaviour like this:
 
-> This PR adds `@mastra/aisearch`, a `MastraVector` implementation backed by Azure AI Search.
+> This PR adds `@mastra/azure-ai-search`, a `MastraVector` implementation backed by Azure AI Search.
 >
 > It is used both as:
 >
@@ -303,9 +326,19 @@ You can summarise the behaviour like this:
 
 ---
 
-That should give you a complete, coherent README that explica bien:
+## 8. Test assets
 
-* qué hace el store,
-* cómo interactúa con Memory,
-* qué índices crea,
-* y por qué la conversación ahora se siente mucho más centrada.
+Additional test documentation for this demo:
+
+- `docs/azure-test-battery.md` - full test battery for `@mastra/azure-ai-search`
+- `docs/rag-vs-mcp-search-evaluation.md` - architecture evaluation for internal RAG vs MCP search
+- `docs/test-documents/document-upload-test.md` - sample upload document (Markdown)
+- `docs/test-documents/document-upload-test.txt` - sample upload document (plain text)
+
+Dual-path runtime validation command:
+
+```bash
+pnpm run test:azure:dual
+```
+
+

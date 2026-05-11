@@ -13,6 +13,7 @@ import {
   listIndexesTool,
   getIndexStatsTool,
   searchWithFiltersTool,
+  advancedSearchDocumentsTool,
 } from '../tools/vector-store-tools';
 
 export const knowledgeAgent = new Agent({
@@ -50,5 +51,6 @@ Be conversational, helpful, and precise in your responses.`,
     listIndexes: listIndexesTool,
     getIndexStats: getIndexStatsTool,
     searchWithFilters: searchWithFiltersTool,
+    advancedSearchDocuments: advancedSearchDocumentsTool,
   },
 });

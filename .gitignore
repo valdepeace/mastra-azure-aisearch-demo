@@ -1,11 +1,33 @@
-output.txt 
-node_modules 
-dist 
-.mastra 
-.env.development 
-.env 
-*.db 
-*.db-* 
-/.data
+output.txt
+
+# Dependencies
+node_modules/
+
+# Build and generated output
+dist/
+.mastra/
+src/mastra/public/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local databases and generated state
+*.db
+*.db-*
+/.data/
+
+# Logs
+*.log
+.mastra-dev*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local tool state
+.serena/
+
 # Examples folder (internal testing only)
-src/mastra/examples/ 
+src/mastra/examples/

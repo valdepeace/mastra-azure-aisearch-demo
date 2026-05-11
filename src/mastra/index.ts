@@ -1,5 +1,5 @@
-
-import { Mastra } from '@mastra/core/mastra';
+import { Mastra } from '@mastra/core';
+import { InMemoryStore, MastraCompositeStore } from '@mastra/core/storage';
 import { PinoLogger } from '@mastra/loggers';
 import { LibSQLStore } from '@mastra/libsql';
 import { weatherWorkflow } from './workflows/weather-workflow';
@@ -7,6 +7,15 @@ import { weatherAgent } from './agents/weather-agent';
 import { knowledgeAgent } from './agents/knowledge-agent';
 import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
 import { knowledgeMemoryAgent } from './agents/knowledge-memory-agent';
+
+const persistentStorage = new LibSQLStore({
+  id: 'main-libsql-storage',
+  url: 'file:./mastra.db',
+});
+
+const observabilityStorage = new InMemoryStore({
+  id: 'observability-storage',
+});
 
 export const mastra = new Mastra({
   workflows: { weatherWorkflow },
@@ -16,27 +25,18 @@ export const mastra = new Mastra({
     knowledgeMemoryAgent,
   },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
-  storage: new LibSQLStore({
-    // stores observability, scores, ... into memory storage, if it needs to persist, change to file:../mastra.db
-    // url: ":memory:",
-    url: 'file:./mastra.db'
+  storage: new MastraCompositeStore({
+    id: 'main-storage',
+    default: persistentStorage,
+    domains: {
+      observability: observabilityStorage.stores.observability,
+    },
   }),
   logger: new PinoLogger({
     name: 'Mastra',
     level: 'info',
   }),
-  telemetry: {
-    // Telemetry is deprecated and will be removed in the Nov 4th release
-    enabled: true, 
+  bundler: {
+    externals: false,
   },
- observability: {
-    default: {
-      enabled: true,
-      // opcional: nivel de detalle
-      // logPrompts: true,      // para ver prompts a modelos
-      // logTools: true,        // para ver llamadas a tools
-      // logMemory: true,       // para ver semantic recall, etc.
-    },
-  },
-  
 });
